@@ -2,10 +2,17 @@ from os import system
 from os import listdir, mkdir
 from os.path import isfile, join
 import re
+import sys
 
 mypath = './'
 
 onlyfiles = [ f for f in listdir(mypath) if isfile(join(mypath,f)) ]
+
+if len(sys.argv) < 2:
+    raise Exception('arg not enough')
+
+category = sys.argv[1]
+print category
 
 for i in onlyfiles:
     print i, 
@@ -15,7 +22,7 @@ for i in onlyfiles:
         print n,
         r = i.partition(n)[2]
         print r
-        obj = './cf/' + n
+        obj = './{0}/{1}'.format(category, n)
         cmd_obj = 'mkdir ' + obj
         print '>>> ' + cmd_obj
         try:

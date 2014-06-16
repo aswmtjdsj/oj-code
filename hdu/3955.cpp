@@ -1,46 +1,19 @@
 #include <iostream>
-#include <cstdio>
-#include <cmath>
 #include <cstring>
-#include <algorithm>
+#include <cstdio>
+#include <queue>
+#include <cmath>
 #define maxn 105
 using namespace std;
-const double pi = acos(-1.0);
-struct point
-{
-    double x,y;
-    point(){}
-    point(double a,double b):x(a),y(b){}
-    point operator - (const point &p)
-    {
-        return point(x - p.x,y - p.y);
-    }
-    point operator + (const point &p)
-    {
-        return point(x + p.x,y + p.y);
-    }
-    double operator * (const point &p)
-    {
-        return x * p.x + y * p.y;
-    }
-    double operator ^ (const point &p)
-    {
-        return x * p.y - y * p.x;
-    }
-    double norm()
-    {
-        return sqrt(x * x + y * y);
-    }
-}sun,earth,vec[maxn],p[maxn],cutl,cutr;
-double multi(point a,point b,point o)
-{
-    return (a - o) ^ (b - o);
-}
-double r;
-int T1,T2,T;
-int n;
+const short inf = 20000;
+bool con[maxn][maxn][7];
+char mat[maxn][maxn];
+bool road[maxn][maxn];
+bool zoc[maxn][maxn];
+int n,m,MP;
+int stx,sty,enx,eny;
 const double eps = 1e-6;
-int comp(double x)
+char comp(double x)
 {
     if(fabs(x) < eps)
         return 0;
@@ -49,163 +22,201 @@ int comp(double x)
     else
         return 1;
 }
-point rotate(point a,point o,double theta)
+struct status
 {
-    point vec = a - o;
-    point to = point(vec.x * cos(theta) - vec.y * sin(theta),vec.x * sin(theta) + vec.y * cos(theta));
-    return o + to;
-}
-double tarea(point p0,point p1,point p2)
-{
-    double k = p0.x * p1.y + p1.x * p2.y + p2.x * p0.y - p1.x * p0.y - p2.x * p1.y - p0.x * p2.y;
-    return k / 2;
-}
-bool cmp(point p,point q)
-{
-    double t1 = atan2(p.y - sun.y,p.x - sun.x),t2 = atan2(q.y - sun.y,q.x - sun.x);
-    return (comp(t1 - t2) > 0);
-}
-struct line
-{
-    double a,b,c;
-    line(){}
-    line(point p,point q)
-    {
-        if(comp(p.x - q.x) == 0)
-        {
-            a = 1.0;
-            b = 0.0;
-            c = -p.x;
-        }
-        else if(comp(p.y - q.y) == 0)
-        {
-            a = 0.0;
-            b = 1.0;
-            c = -p.y;
-        }
-        else
-        {
-            a = 1.0;
-            b = -(p.x - q.x) / (p.y - q.y);
-            c = -(p.x + b * p.y);
-        }
-    }
+    short x,y,turn;
+    float mp;
+    status(){}
+    status(short _x,short _y,float _m,short _t):x(_x),y(_y),mp(_m),turn(_t){}
 };
-bool arc(line llll,point &P)
+/*bool operator < (const status a,const status b)
+ * {
+ *     return (a.turn > b.turn || (a.turn == b.turn && comp(a.mp - b.mp) < 0));
+ *     }*/
+struct dist
 {
-    double a = llll.a,b = llll.b,c = llll.c;
-    double A = b * b + 1,B = 2.0 * b * c + 2.0 * b * earth.x - 2.0 * earth.y,C = c * c + 2.0 * c * earth.x + earth.x * earth.x + earth.y * earth.y - r * r;
-    double det = B * B - 4.0 * A * C;
-    if(comp(det) < 0)
-        return false;
-    else if(comp(det) == 0)
+    short turn;
+    float mp;
+    dist(){}
+    dist(float _m,int _t):turn(_t),mp(_m){}
+} dis[maxn][maxn];
+/*
+ * 6 nw
+ * 5 w
+ * 4 sw
+ * 3 se
+ * 2 e
+ * 1 ne
+ * */
+char dx1[] = {0,-1,0,1,1,0,-1};//even
+char dy1[] = {0,1,1,1,0,-1,0};
+char dx2[] = {0,-1,0,1,1,0,-1};//odd
+char dy2[] = {0,0,1,0,-1,-1,-1};
+bool check(short x,short y)
+{
+    return (1 <= x && x <= n && 1 <= y && y <= m);
+}
+void bfs()
+{
+    queue <status> Q;
+    Q.push(status(stx,sty,MP,1));
+    dis[stx][sty] = dist(MP,1);
+    while(!Q.empty())
     {
-        double x,y;
-        y = (-B + sqrt(det)) / (2.0 * A);
-        x = -(b * y + c);
-        point w(x,y);
-        P = w;
-        return true;
+        status now = Q.front();
+        Q.pop();
+        //if(now.x == enx && now.y == eny)
+        //break;
+        if(comp(now.mp) <= 0)
+        {
+            now.mp = MP;
+            now.turn ++;
+        }
+        for(int i = 1;i <= 6;i++)
+        {
+            int x,y;
+            if(now.x % 2 == 0)
+            {
+                x = now.x + dx1[i];
+                y = now.y + dy1[i];
+            }
+            else
+            {
+                x = now.x + dx2[i];
+                y = now.y + dy2[i];
+            }
+            float pm = now.mp;
+            if(!check(x,y) || mat[x][y] == 3)
+                continue;
+            else if(zoc[x][y] == 1 && zoc[now.x][now.y] == 1)
+            {
+                if(dis[x][y].turn > now.turn || (dis[x][y].turn == now.turn && comp(dis[x][y].mp) < 0))
+                {
+                    Q.push(status(x,y,0,now.turn));
+                    dis[x][y] = dist(0,now.turn);
+                }
+            }
+            else if(road[x][y] == true && road[now.x][now.y] == true)
+            {
+                if(dis[x][y].turn > now.turn || (dis[x][y].turn == now.turn && comp(dis[x][y].mp - (pm - 0.25)) < 0))
+                {
+                    Q.push(status(x,y,pm - 0.25,now.turn));
+                    dis[x][y] = dist(pm - 0.25,now.turn);
+                }
+            }
+            else if(con[now.x][now.y][i] == 1)
+            {
+                if(dis[x][y].turn > now.turn || (dis[x][y].turn == now.turn && comp(dis[x][y].mp) < 0))
+                {
+                    Q.push(status(x,y,0,now.turn));
+                    dis[x][y] = dist(0,now.turn);
+                }
+            }
+            else if(mat[x][y] == 1)
+            {
+                if(dis[x][y].turn > now.turn || (dis[x][y].turn == now.turn && comp(dis[x][y].mp - (pm - 2)) < 0))
+                {
+                    Q.push(status(x,y,pm - 2,now.turn));
+                    dis[x][y] = dist(pm - 2,now.turn);
+                }
+            }
+            else if(mat[x][y] == 0)
+            {
+                if(dis[x][y].turn > now.turn || (dis[x][y].turn == now.turn && comp(dis[x][y].mp - (pm - 1)) < 0))
+                {
+                    Q.push(status(x,y,pm - 1,now.turn));
+                    dis[x][y] = dist(pm - 1,now.turn);
+                }
+            }
+        }
     }
-    else
+}
+/*
+   0 cost 1
+   1 cost 2
+   3 can't
+   */
+void fuck(short x,short y)
+{
+    for(short i = 1;i <= 6;i++)
     {
-        double y1 = (-B + sqrt(det))/(2.0 * A),y2 = (-B - sqrt(det)) / (2.0 * A);
-        double x1 = -(b * y1 + c),x2 = -(b * y2 + c);
-        point w1(x1,y1),w2(x2,y2);
-        double dis1 = (w1 - sun).norm(),dis2 = (w2 - sun).norm();
-        if(comp(dis1 - dis2) > 0)
-            P = w2;
+        if(x % 2 == 0 && check(x + dx1[i],y + dy1[i]))
+            zoc[x + dx1[i]][y + dy1[i]] = true;
         else
-            P = w1;
-        return true;
+        {
+            if( check(x + dx2[i],y + dy2[i]))
+                zoc[x + dx2[i]][y + dy2[i]] = true;
+        }
     }
 }
-void calc()
+
+void gao()
 {
-    double a,b,c;
-    a = (sun.y - earth.y) * (sun.y - earth.y) + (sun.x - earth.x) * (sun.x - earth.x);
-    b = -2.0 * earth.y * ((sun.y - earth.y) * (sun.y - earth.y) + (sun.x - earth.x) * (sun.x - earth.x)) - 2.0 * r * r * (sun.y - earth.y);
-    c = r * r * r * r + 2.0 * r * r * (sun.y - earth.y) * earth.y - r * r * (sun.x - earth.x) * (sun.x - earth.x) + earth.y * earth.y * ((sun.y - earth.y) * (sun.y - earth.y) + (sun.x - earth.x) * (sun.x - earth.x));
-    double det = b * b - 4.0 * a * c;
-    double y1 = (-b + sqrt(det))/(2.0 * a),y2 = (-b - sqrt(det)) / (2.0 * a);
-    double x1 = (r * r - (sun.y - earth.y) * (y1 - earth.y)) / (sun.x - earth.x) + earth.x;
-    double x2 = (r * r - (sun.y - earth.y) * (y2 - earth.y)) / (sun.x - earth.x) + earth.x;
-    cutl = point(x1,y1),cutr = point(x2,y2);
-    if(!cmp(cutl,cutr))
-        swap(cutl,cutr);
-}
-double len(point a,point b)
-{
-    point vec1 = point(a - earth),vec2 = point(b - earth);
-    double value = (vec1 * vec2) / (vec1.norm() * vec2.norm());
-    if(comp(value - 1.0) >= 0)
-        value = 1.0;
-    double theta = acos(value);
-    return r * theta;
+    scanf("%d %d %d",&n,&m,&MP);
+    for(short i = 1;i <= n;i++)
+        for(short j = 1;j <= m;j++)
+        {
+            road[i][j] = 0;
+            mat[i][j] = -1;
+            zoc[i][j] = 0;
+        }
+    for(short i = 1;i <= n;i++)
+        for(short j = 1;j <= m;j++)
+        {
+            int opt;
+            scanf("%d",&opt);
+            for(short k = 9;k >= 0;k--)
+            {
+                if(opt >= (1 << k))
+                {
+                    opt -= (1 << k);
+                    if(k > 3)
+                        con[i][j][k - 3] = true;
+                    else
+                    {
+                        if(k == 3)
+                        {
+                            mat[i][j] = 3;
+                            fuck(i,j);
+                        }
+                        else
+                        {
+                            if(mat[i][j] == -1)
+                                mat[i][j] = k;
+                            if(mat[i][j] == 2)
+                            {
+                                mat[i][j] = k;
+                                road[i][j] = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if(k > 3)
+                        con[i][j][k - 3] = false;
+                }
+            }
+        }
+    for(short i = 1;i <= n;i++)
+        for(short j = 1;j <= m;j++)
+            dis[i][j] = dist(0,inf);
+    scanf("%d %d %d %d",&stx,&sty,&enx,&eny);
+    stx++;
+    sty++;
+    enx++;
+    eny++;
+    bfs();
+    short ans = dis[enx][eny].turn;
+    printf("%d\n",(ans == inf?-1:ans));
 }
 int main()
 {
-    //int cas = 0;
-    while(scanf("%lf %lf %lf %lf %lf",&sun.x,&sun.y,&earth.x,&earth.y,&r) == 5)
+    int t;
+    scanf("%d",&t);
+    for(int i = 1;i <= t;i++)
     {
-        //cas++;
-        //calc arc
-        calc();
-        scanf("%d %d %d %d",&n,&T1,&T2,&T);
-        for(int i = 0;i < n;i++)
-        {
-            double x,y;
-            scanf("%lf %lf",&x,&y);
-            p[i] = point(x,y);
-        }
-        int t1 = T % T1,t2 = T % T2;
-        double gong = 2.0 * pi * (double)t1 / (double)T1,zi = 2.0 * pi * (double) t2 / (double) T2;
-        point zhong,temp(0,0);
-        double area = 0,sumx = 0,sumy = 0,sarea = 0;
-        for(int i = 1;i < n - 1;i++)
-        {
-            temp.x = p[0].x + p[i].x + p[i+1].x;
-            temp.y = p[0].y + p[i].y + p[i+1].y;
-            area = tarea(p[0],p[i],p[i+1]);
-            sarea += area;
-            sumx += temp.x * area;
-            sumy += temp.y * area;
-        }
-        zhong = point(sumx / sarea / 3,sumy / sarea / 3);
-        for(int i = 0;i < n;i++)
-            vec[i] = p[i] - zhong;
-        //rotate the gravity point
-        zhong = rotate(zhong,earth,gong);
-        //gongzhuan
-        for(int i = 0;i < n;i++)
-            p[i] = vec[i] + zhong;
-        //zizhuan
-        for(int i = 0;i < n;i++)
-            p[i] = rotate(p[i],zhong,zi);
-        sort(p,p + n,cmp);
-        if(!cmp(cutl,cutr))
-            swap(cutl,cutr);
-        point L = p[0],R = p[n - 1];
-        if(!cmp(L,R))
-            swap(L,R);
-        point xl,xr;
-        line LE = line(sun,L),RI = line(sun,R);
-        if(comp(multi(L,cutl,sun)) <= 0)
-            xl = cutl;
-        else if(comp(multi(L,cutr,sun)) >= 0)
-            xl = cutr;
-        else
-            arc(LE,xl);
-        if(comp(multi(R,cutl,sun)) <= 0)
-            xr = cutl;
-        else if(comp(multi(R,cutr,sun)) >= 0)
-            xr = cutr;
-        else
-            arc(RI,xr);
-        double len1 = len(cutl,cutr),len2 = len(xl,xr);
-        if(comp((L - sun).norm() - (xl - sun).norm()) > 0 || comp((R - sun).norm() - (xr - sun).norm()) > 0)
-            len2 = 0;
-        double ans = len1 - len2;
-        printf("%.2lf\n",ans);
+        printf("Case %d: ",i);
+        gao();
     }
 }

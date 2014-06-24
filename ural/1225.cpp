@@ -1,3 +1,25 @@
+/*
+red->blue->white(3,4)
+red->white(3,4)
+white->blue->red(1,2)
+white->red(1,2)
+
+red[1] = 1
+white[1] = 1
+red-blue[1] = 0
+white-blue[1] = 0
+
+red[2] = white[1]
+white[2] = red[1]
+red-blue[2] = red[1]
+white-blue[2] = white[1]
+
+red[3] = white[2] + white-blue[2]
+white[3] = red[2] + red-blue[2]
+white-blue[3] = white[2]
+red-blue[3] = red[2]
+*/
+
 #include <iostream>
 #include <cstdio>
 using namespace std;

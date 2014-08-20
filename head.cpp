@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
-#include <string>
 #include <cstdlib>
+#include <cmath>
 #include <cctype>
+
+#include <string>
 #include <map>
 #include <set>
 #include <bitset>
@@ -11,8 +13,8 @@
 #include <deque>
 #include <list>
 #include <vector>
+
 #include <algorithm>
-#include <cmath>
 #include <complex>
 using namespace std;
 
@@ -25,6 +27,9 @@ using namespace std;
 typedef long long int64;
 typedef pair<int, int> pii;
 typedef pair<double, double> pdd;
+
+template <class T>
+inline T sqr(T x) { return x * x; }
 
 const int inf = ~0u >> 1;
 const double eps = 1e-8;

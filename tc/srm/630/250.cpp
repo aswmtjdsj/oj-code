@@ -3,16 +3,8 @@ class Egalitarianism3 {
         int ans;
         vector < vector<int> >  graph;
         bool visited[100];
-        void dfs(set <int> &nodes, vector<int>& okay) {
+        void dfs(vector <int> &nodes, vector<int>& okay) {
             ans = max(ans, (int) okay.size());
-            /*for(auto i = okay.begin(); i != okay.end(); i++) {
-             *          cout << *i << ' ';
-             *                  }
-             *                          cout << endl;
-             *                                  for(auto i = nodes.begin(); i != nodes.end(); i++) {
-             *                                              cout << *i << ' ';
-             *                                                      }
-             *                                                              cout << endl;*/
             for(auto i = nodes.begin(); i != nodes.end(); i++) {
                 if(visited[*i]) continue;
                 int tmp = -1;
@@ -31,12 +23,9 @@ class Egalitarianism3 {
                 }
                 if(flag) {
                     int a = *i;
-                    set<int> nnodes = nodes;
-                    nnodes.erase(a);
                     okay.PB(a);
                     visited[a] = true;
-                    dfs(nnodes, okay);
-                    nnodes.insert(a);
+                    dfs(nodes, okay);
                     okay.pop_back();
                 }
             }
@@ -71,36 +60,18 @@ class Egalitarianism3 {
                     }
                 }
             }
-            /*for(int i = 0; i < n; i++) {
-                for(int j = 0; j < n; j++) {
-                    cout << graph[i][j] << ' ';
-                }
-                cout << endl;
-            }*/
             ans = 0;
-            map<int, set<int> > M;
-            for(int i = 0; i < n; i++) {
-                for(int j = i + 1; j < n; j++) {
-                    M[graph[i][j]].insert(i);
-                    M[graph[i][j]].insert(j);
-                }
+            vector<int> t;
+            for(int i = 0; i < n; i++) t.PB(i);
+            vector<int> okay;
+            for(auto id = t.begin(); id != t.end(); id++) {
+                int a = *id;
+                okay.PB(a);
+                fill(visited, visited + n, false);
+                visited[a] = true;
+                dfs(t, okay);
+                okay.pop_back();
             }
-            for(auto idx = M.begin(); idx != M.end(); idx++) {
-                set<int> t = idx->second;
-                vector<int> okay;
-                for(auto id = t.begin(); id != t.end(); id++) {
-                    int a = *id;
-                    set <int> st = t;
-                    okay.PB(a);
-                    st.erase(a);
-                    fill(visited, visited + n, false);
-                    visited[a] = true;
-                    dfs(st, okay);
-                    st.insert(a);
-                    okay.pop_back();
-                }
-            }
-
             return ans;
         }
 };

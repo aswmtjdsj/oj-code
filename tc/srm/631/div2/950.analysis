@@ -1,0 +1,17 @@
+[p][0][0], up 1, rem 0, be up 0
+[p][0][1], up 1, rem 1, be up 1
+[p][0][2], up 0, rem 2, be up 0
+[p][1][0], up 1, rem 0, be up 1
+[p][1][1], up 0, rem 1, be up 0
+[p][1][2], up 0, rem 2, be up 1
+
+up x -> be up x
+
+then get formula
+
+init:
+dp[0][0][0] = dp[0][0][2] = dp[0][1][1] = 1;
+dp[0][0][1] = dp[0][1][0] = dp[0][1][2] = 0;
+
+ans[n]if(1) = dp[n][1][1] + dp[n][1][2];
+ans[n]if(0) = dp[n][0][2]

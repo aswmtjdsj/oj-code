@@ -66,6 +66,7 @@ int main() {
 		/*for(int64 j = 1; j < b; j++) {
 			ans = (ans + i * b + j) % mod;
 		}*/
+		
 		int64 temp = ((1 + b - 1) * (b-1) / 2) % mod;
 		int64 ta = (temp * i) % mod;
 		ta = (ta * b) % mod;

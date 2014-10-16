@@ -75,6 +75,7 @@ int main() {
 		biu[i] = temp;
 	}
 	cout << biu[n-1][3] * k << endl;
+	
 	for(auto v: biu) {
 		for(auto i: v) {
 			cout << i * k << ' ';

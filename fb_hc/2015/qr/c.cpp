@@ -75,6 +75,13 @@ int main() {
         for(int i = 0; i < m; i++) {
             cin >> maze[i];
         }
+        /*if(k == 52) {
+            for(int i = 0; i < m; i++) {
+                cout << maze[i] << endl;
+            }
+        } else {
+            continue;
+        }*/
         PII sp = MP(-1, -1), gp = MP(-1, -1);
         vector < pair<PII, int> > ts;
         for(int i = 0; i < m; i++) {
@@ -108,12 +115,15 @@ int main() {
             if(cur.second != 0) {
                 bool shot = false;
                 for(int i = 0; i < ts.size() && !shot; i++) {
+                    // cout << "O " << ts[i].first.first << ' ' << ts[i].first.second << endl;
+                    // cout << "C " << cur.first.first << ' ' << cur.first.second << ": " << cur.second << endl;
                     int t_dir = (ts[i].second + cur.second) % 4;
-                    int j = 0;
+                    int j = 1;
                     while(1) {
                         PII light = MP(ts[i].first.first + dir[t_dir].first * j, ts[i].first.second + dir[t_dir].second * j);
                         if(light.first < 0 || light.first >= m || light.second < 0 || light.second >= n) break;
                         bool hit = false;
+                        // cout << light.first << ' ' << light.second << endl;
                         if(maze[light.first][light.second] == '#') {
                             hit = true;
                         }
@@ -136,17 +146,31 @@ int main() {
                 if(shot) {
                     continue;
                 }
+                // cout << "Pass" << endl;
             }
             if(cur.first == gp) {
                 ans = min(ans, cur.second);
             }
             for(int d = 0; d < 4; d++) {
                 PII next = MP(cur.first.first + dir[d].first, cur.first.second + dir[d].second);
-                if(next.first >= 0 && next.first < m && next.second >= 0 && next.second < n && maze[next.first][next.second] != '#') {
-                    if(M.find(MP(next, (cur.second+1) % 4)) == M.end()) {
-                        Q.push(MP(next, cur.second+1));
-                        M[MP(next, (cur.second+1) % 4)] = true;
+                if(next.first < 0 || next.first >= m || next.second < 0 || next.second >= n || maze[next.first][next.second] == '#') {
+                    continue;
+                }
+
+                bool okay = true;
+                for(int p = 0; p < 4; p++) {
+                    if(maze[next.first][next.second] == dir_s[p]) {
+                        okay = false;
+                        break;
                     }
+                }
+                if(!okay) {
+                    continue;
+                }
+
+                if(M.find(MP(next, (cur.second+1) % 4)) == M.end()) {
+                    Q.push(MP(next, cur.second+1));
+                    M[MP(next, (cur.second+1) % 4)] = true;
                 }
             }
         }

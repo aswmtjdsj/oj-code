@@ -110,7 +110,23 @@ int main() {
         vis.resize(n);
         ans = 0;
         for(int i = 0; i < n; i++) {
-            cin >> opt[i];
+            string temp;
+            cin >> temp;
+            opt[i] = "";
+            for(int j = 0; j < temp.size(); j++) {
+                if(j == 0 || temp[j] != temp[j-1]) {
+                    opt[i].push_back(temp[j]);
+                }
+            }
+            int cnt[30];
+            memset(cnt, 0, sizeof(cnt));
+            for(int j = 0; j < opt[i].size(); j++) {
+                cnt[opt[i][j]-'a']++;
+                if(cnt[opt[i][j]-'a'] > 1) {
+                    ans = 0;
+                    goto print;
+                }
+            }
         }
         for(int i = 0; i < n; i++) {
             fill(vis.begin(), vis.end(), false);
@@ -119,6 +135,7 @@ int main() {
             step.PB(i);
             dfs(i, step);
         }
+print:
         printf("Case #%d: %d\n", _, ans);
     }
 }

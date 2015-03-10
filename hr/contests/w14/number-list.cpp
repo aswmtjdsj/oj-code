@@ -49,7 +49,7 @@ int main() {
             // cout << l_i << ' ' << u_i << endl;
             long long leftp = p[i].second - l_i + 1,
                  rightp = u_i - p[i].second;
-            c[p[i].first] += leftp * (rightp+1);
+            c[p[i].first] += leftp * (rightp+1); // WA point, as there may be repeated elements
             pos.insert(p[i].second);
         }
         for(auto i: c) {
